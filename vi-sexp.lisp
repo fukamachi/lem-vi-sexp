@@ -57,7 +57,8 @@
   (dotimes (i n)
     (when (eql (character-at (current-point)) #\))
       (character-offset (current-point) 1))
-    (lem:forward-up-list (current-point))))
+    (lem:forward-up-list (current-point)))
+  (character-offset (current-point) -1))
 
 (defun vi-sexp-wrap-round-at (insert-at)
   (with-point ((p (current-point)))
