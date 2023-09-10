@@ -138,7 +138,8 @@
   (change-state 'insert))
 
 (define-command vi-sexp-raise-form () ()
-  (backward-up-list (current-point))
+  (unless (syntax-open-paren-char-p (character-at (current-point)))
+    (backward-up-list (current-point)))
   (paredit-raise))
 
 (defun add-vi-sexp-mapping ()
