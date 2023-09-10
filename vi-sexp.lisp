@@ -180,7 +180,10 @@
   (unless (syntax-open-paren-char-p (character-at (current-point)))
     (backward-up-list (current-point)))
   (dotimes (i n)
-    (paredit-raise)))
+    (paredit-raise))
+  (with-point ((end (current-point)))
+    (scan-lists end 1 0 t)
+    (indent-points (current-point) end)))
 
 (define-command vi-sexp-raise (&optional (n 1)) ("p")
   (dotimes (i n)
