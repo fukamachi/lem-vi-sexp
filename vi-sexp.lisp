@@ -39,7 +39,36 @@
                 :paredit-backward-delete
                 :paredit-forward-delete)
   (:export :vi-sexp
-           :add-vi-sexp-mapping))
+           :add-vi-sexp-mapping
+           :vi-sexp-splice
+           :vi-sexp-wrap-round
+           :vi-sexp-wrap-round-after
+           :vi-sexp-round-head-wrap-list
+           :vi-sexp-round-tail-wrap-list
+           :vi-sexp-move-to-next-bracket
+           :vi-sexp-move-to-prev-bracket
+           :vi-sexp-backward
+           :vi-sexp-forward
+           :vi-sexp-indent-toplevel
+           :vi-sexp-raise-form
+           :vi-sexp-raise
+           :vi-sexp-insert-head
+           :vi-sexp-insert-tail
+           :vi-sexp-barf
+           :vi-sexp-slurp
+           :vi-a-paren
+           :vi-inner-paren
+           :vi-sexp-a-toplevel-form
+           :vi-sexp-inner-toplevel-form
+           :vi-sexp-an-element
+           :vi-sexp-inner-element
+           :vi-a-double-quote
+           :vi-inner-double-quote
+           :vi-sexp-insert-paren
+           :vi-sexp-close-parenthesis
+           :vi-sexp-insert-doublequote
+           :vi-sexp-backward-delete
+           :vi-sexp-forward-delete))
 (in-package :lem-vi-sexp)
 
 (declaim (ftype (function ()) add-vi-sexp-mapping))
@@ -53,12 +82,22 @@
   (dotimes (i n)
     (lem:backward-up-list (current-point))))
 
-(define-command vi-sexp-move-to-next-bracket (n) ("p")
+(define-command vi-sexp-move-to-next-bracket (&optional (n 1)) ("p")
   (dotimes (i n)
     (when (eql (character-at (current-point)) #\))
       (character-offset (current-point) 1))
     (lem:forward-up-list (current-point)))
   (character-offset (current-point) -1))
+
+(define-command vi-sexp-backward (&optional (n 1)) ("p")
+  (paredit-backward n))
+
+(define-command vi-sexp-forward (&optional (n 1)) ("p")
+  (paredit-forward n))
+
+(define-command vi-sexp-splice (&optional (n 1)) ("p")
+  (dotimes (i n)
+    (paredit-splice)))
 
 (defun vi-sexp-wrap-round-at (insert-at)
   (with-point ((p (current-point)))
@@ -137,33 +176,61 @@
   (forward-up-list (current-point))
   (change-state 'insert))
 
-(define-command vi-sexp-raise-form () ()
+(define-command vi-sexp-raise-form (&optional (n 1)) ("p")
   (unless (syntax-open-paren-char-p (character-at (current-point)))
     (backward-up-list (current-point)))
-  (paredit-raise))
+  (dotimes (i n)
+    (paredit-raise)))
+
+(define-command vi-sexp-raise (&optional (n 1)) ("p")
+  (dotimes (i n)
+    (paredit-raise)))
+
+(define-command vi-sexp-barf (&optional (n 1)) ("p")
+  (dotimes (i n)
+    (paredit-barf)))
+
+(define-command vi-sexp-slurp (&optional (n 1)) ("p")
+  (dotimes (i n)
+    (paredit-slurp)))
+
+(define-command vi-sexp-insert-paren () ()
+  (paredit-insert-paren))
+
+(define-command vi-sexp-close-parenthesis () ()
+  (paredit-close-parenthesis))
+
+(define-command vi-sexp-insert-doublequote () ()
+  (paredit-insert-doublequote))
+
+(define-command vi-sexp-backward-delete (&optional (n 1)) ("p")
+  (paredit-backward-delete n))
+
+(define-command vi-sexp-forward-delete (&optional (n 1)) ("p")
+  (paredit-forward-delete n))
 
 (defun add-vi-sexp-mapping ()
-  (define-key *normal-keymap* "Space @" 'paredit-splice)
+  (define-key *normal-keymap* "Space @" 'vi-sexp-splice)
   (define-key *normal-keymap* "Space w" 'vi-sexp-wrap-round)
   (define-key *normal-keymap* "Space W" 'vi-sexp-wrap-round-after)
   (define-key *normal-keymap* "Space i" 'vi-sexp-round-head-wrap-list)
   (define-key *normal-keymap* "Space I" 'vi-sexp-round-tail-wrap-list)
   (define-key *normal-keymap* "(" 'vi-sexp-move-to-prev-bracket)
   (define-key *normal-keymap* ")" 'vi-sexp-move-to-next-bracket)
-  (define-key *normal-keymap* "M-b" 'paredit-backward)
-  (define-key *normal-keymap* "M-w" 'paredit-forward)
+  (define-key *normal-keymap* "M-b" 'vi-sexp-backward)
+  (define-key *normal-keymap* "M-w" 'vi-sexp-forward)
   (define-key *operator-keymap* "-" 'vi-sexp-indent-toplevel)
   (define-key *normal-keymap* "Space o" 'vi-sexp-raise-form)
-  (define-key *normal-keymap* "Space O" 'paredit-raise)
+  (define-key *normal-keymap* "Space O" 'vi-sexp-raise)
   (define-key *normal-keymap* "Space h" 'vi-sexp-insert-head)
   (define-key *normal-keymap* "Space l" 'vi-sexp-insert-tail)
-  (define-key *normal-keymap* "M-H" 'paredit-barf)
-  (define-key *normal-keymap* "M-L" 'paredit-slurp)
-  (define-key *insert-keymap* "(" 'paredit-insert-paren)
-  (define-key *insert-keymap* ")" 'paredit-close-parenthesis)
-  (define-key *insert-keymap* "\"" 'paredit-insert-doublequote)
-  (define-key *insert-keymap* 'delete-previous-char 'paredit-backward-delete)
-  (define-key *insert-keymap* 'delete-next-char 'paredit-forward-delete)
+  (define-key *normal-keymap* "M-H" 'vi-sexp-barf)
+  (define-key *normal-keymap* "M-L" 'vi-sexp-slurp)
+  (define-key *insert-keymap* "(" 'vi-sexp-insert-paren)
+  (define-key *insert-keymap* ")" 'vi-sexp-close-parenthesis)
+  (define-key *insert-keymap* "\"" 'vi-sexp-insert-doublequote)
+  (define-key *insert-keymap* 'delete-previous-char 'vi-sexp-backward-delete)
+  (define-key *insert-keymap* 'delete-next-char 'vi-sexp-forward-delete)
   (define-key *outer-text-objects-keymap* "f" 'vi-a-paren)
   (define-key *inner-text-objects-keymap* "f" 'vi-inner-paren)
   (define-key *outer-text-objects-keymap* "F" 'vi-sexp-a-toplevel-form)
