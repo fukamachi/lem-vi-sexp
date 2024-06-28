@@ -15,7 +15,7 @@
                 :range-beginning
                 :range-end)
   (:import-from :lem-vi-mode/commands
-                :vi-move-to-matching-paren
+                :vi-move-to-matching-item
                 :vi-indent
                 :vi-a-double-quote
                 :vi-inner-double-quote
@@ -104,7 +104,7 @@
     (unless (bolp p)
       (let ((c (character-at p -1)))
         (when (syntax-closed-paren-char-p c)
-          (vi-move-to-matching-paren))
+          (vi-move-to-matching-item))
         (cond
           ((or (syntax-space-char-p c)
                (syntax-open-paren-char-p c))
