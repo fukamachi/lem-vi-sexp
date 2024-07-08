@@ -78,24 +78,24 @@
      :keymap *vi-sexp-keymap*)
   (add-vi-sexp-mapping))
 
-(define-command vi-sexp-move-to-prev-bracket (n) ("p")
+(define-command vi-sexp-move-to-prev-bracket (n) (:universal)
   (dotimes (i n)
     (lem:backward-up-list (current-point))))
 
-(define-command vi-sexp-move-to-next-bracket (&optional (n 1)) ("p")
+(define-command vi-sexp-move-to-next-bracket (&optional (n 1)) (:universal)
   (dotimes (i n)
     (when (eql (character-at (current-point)) #\))
       (character-offset (current-point) 1))
     (lem:forward-up-list (current-point)))
   (character-offset (current-point) -1))
 
-(define-command vi-sexp-backward (&optional (n 1)) ("p")
+(define-command vi-sexp-backward (&optional (n 1)) (:universal)
   (paredit-backward n))
 
-(define-command vi-sexp-forward (&optional (n 1)) ("p")
+(define-command vi-sexp-forward (&optional (n 1)) (:universal)
   (paredit-forward n))
 
-(define-command vi-sexp-splice (&optional (n 1)) ("p")
+(define-command vi-sexp-splice (&optional (n 1)) (:universal)
   (dotimes (i n)
     (paredit-splice)))
 
@@ -176,7 +176,7 @@
   (forward-up-list (current-point))
   (change-state 'insert))
 
-(define-command vi-sexp-raise-form (&optional (n 1)) ("p")
+(define-command vi-sexp-raise-form (&optional (n 1)) (:universal)
   (unless (syntax-open-paren-char-p (character-at (current-point)))
     (backward-up-list (current-point)))
   (dotimes (i n)
@@ -185,15 +185,15 @@
     (scan-lists end 1 0 t)
     (indent-points (current-point) end)))
 
-(define-command vi-sexp-raise (&optional (n 1)) ("p")
+(define-command vi-sexp-raise (&optional (n 1)) (:universal)
   (dotimes (i n)
     (paredit-raise)))
 
-(define-command vi-sexp-barf (&optional (n 1)) ("p")
+(define-command vi-sexp-barf (&optional (n 1)) (:universal)
   (dotimes (i n)
     (paredit-barf)))
 
-(define-command vi-sexp-slurp (&optional (n 1)) ("p")
+(define-command vi-sexp-slurp (&optional (n 1)) (:universal)
   (dotimes (i n)
     (paredit-slurp)))
 
@@ -206,10 +206,10 @@
 (define-command vi-sexp-insert-doublequote () ()
   (paredit-insert-doublequote))
 
-(define-command vi-sexp-backward-delete (&optional (n 1)) ("p")
+(define-command vi-sexp-backward-delete (&optional (n 1)) (:universal)
   (paredit-backward-delete n))
 
-(define-command vi-sexp-forward-delete (&optional (n 1)) ("p")
+(define-command vi-sexp-forward-delete (&optional (n 1)) (:universal)
   (paredit-forward-delete n))
 
 (defun add-vi-sexp-mapping ()
